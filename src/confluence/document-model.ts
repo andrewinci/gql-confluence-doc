@@ -31,8 +31,10 @@ type TextMarkColor = {
     color: string;
   };
 };
+type TextMarkStrong = { type: "strong" };
+type TextMarkItalic = { type: "em" };
 
-type TextMark = TextMarkLink | TextMarkColor;
+type TextMark = TextMarkLink | TextMarkColor | TextMarkStrong | TextMarkItalic;
 type Text = {
   type: "text";
   text: string;
@@ -41,12 +43,14 @@ type Text = {
 
 export const Text = (
   text: string,
-  opts?: { href?: string; color?: string },
+  opts?: { href?: string; color?: string; strong?: true; italic?: true },
 ): Text => {
   const marks: TextMark[] = [];
   if (opts?.href) marks.push({ type: "link", attrs: { href: opts.href } });
   if (opts?.color)
     marks.push({ type: "textColor", attrs: { color: opts.color } });
+  if (opts?.strong) marks.push({ type: "strong" });
+  if (opts?.italic) marks.push({ type: "em" });
   return {
     type: "text",
     text,

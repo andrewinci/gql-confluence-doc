@@ -8,8 +8,8 @@ import {
 
 const samplePage = ADFDocument([
   Heading([Text("This is a "), Text("title", { color: "red" })], 1),
-  Paragraph([Text("This is a paragraph")]),
-  Paragraph([Text("This is a paragraph 2")]),
+  Paragraph([Text("This is a paragraph", {strong: true})]),
+  Paragraph([Text("This is a paragraph 2", {italic: true, color: "green"})]),
 
   Heading([Text("This is an header 2")], 2),
   Paragraph([Text("This is a paragraph 3")]),
