@@ -1,3 +1,5 @@
+type Color = string;
+
 export type ADFDocument = {
   type: "doc";
   content: Node[];
@@ -10,7 +12,7 @@ export const ADFDocument = (content: Node[]): ADFDocument => ({
   version: 1,
 });
 
-type Node = Paragraph | Text | Heading | TableOfContent;
+type Node = Paragraph | Text | Heading | TableOfContent | Table;
 
 /*************** Paragraph node ***************/
 type Paragraph = {
@@ -18,7 +20,7 @@ type Paragraph = {
   content: Node[];
 };
 
-export const Paragraph = (content: Node[]): Paragraph => ({
+export const Paragraph = (...content: Node[]): Paragraph => ({
   type: "paragraph",
   content,
 });
@@ -28,7 +30,7 @@ type TextMarkLink = { type: "link"; attrs: { href: string } };
 type TextMarkColor = {
   type: "textColor";
   attrs: {
-    color: string;
+    color: Color;
   };
 };
 type TextMarkStrong = { type: "strong" };
@@ -43,7 +45,7 @@ type Text = {
 
 export const Text = (
   text: string,
-  opts?: { href?: string; color?: string; strong?: true; italic?: true },
+  opts?: { href?: string; color?: Color; strong?: true; italic?: true },
 ): Text => {
   const marks: TextMark[] = [];
   if (opts?.href) marks.push({ type: "link", attrs: { href: opts.href } });
@@ -58,16 +60,86 @@ export const Text = (
   };
 };
 
-/*************** Text node ***************/
+/*************** Heading node ***************/
 type Heading = {
   type: "heading";
   attrs: { level: 1 | 2 | 3 | 4 };
   content: Text[];
 };
 
-export const Heading = (content: Text[], level: 1 | 2 | 3 | 4): Heading => ({
+export const Heading = (level: 1 | 2 | 3 | 4, ...content: Text[]): Heading => ({
   type: "heading",
   attrs: { level },
+  content,
+});
+
+/*************** Table node ***************/
+type Table = {
+  type: "table";
+  attrs?: {
+    layout?: "default";
+    width?: 760;
+  };
+  content: TableRow[];
+};
+
+type TableRow = {
+  type: "tableRow";
+  attrs?: {
+    background?: Color;
+  };
+  content: TableHeader[] | TableCell[];
+};
+
+type TableHeader = {
+  type: "tableHeader";
+  attrs?: {
+    background?: Color;
+    colspan?: 1;
+    rowspan?: 1;
+  };
+  content: Paragraph[];
+};
+
+type TableCell = {
+  type: "tableCell";
+  attrs?: {
+    background?: Color;
+    colspan?: 1;
+    rowspan?: 1;
+  };
+  content: Paragraph[];
+};
+
+export const Table = (rows: TableRow[]): Table => {
+  return {
+    type: "table",
+    content: rows,
+  };
+};
+
+export const TableRow = (
+  content: TableHeader[] | TableCell[]
+): TableRow => ({
+  type: "tableRow",
+  content,
+});
+
+export const TableHeader = (content: Paragraph[], opts?:{ background: Color}): TableHeader => ({
+  type: "tableHeader",
+  attrs: {
+    ...(opts?.background ? { background: opts.background } : {}),
+  },
+  content,
+});
+export const TableCell = (
+  content: Paragraph[],
+  opts?: { background: Color },
+): TableCell => ({
+  type: "tableCell",
+  attrs: {
+    ...(opts?.background ? { background: opts.background } : {}),
+  },
   content,
 });
 
@@ -98,7 +170,7 @@ type TableOfContent = {
   };
 };
 
-export const TableOfContent = ():TableOfContent => ({
+export const TableOfContent = (): TableOfContent => ({
   type: "extension",
   attrs: {
     layout: "default",
