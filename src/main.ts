@@ -1,52 +1,24 @@
 import { ConfluenceClient } from "./confluence/client";
-import { ADFDocument } from "./confluence/document-model";
+import {
+  ADFDocument,
+  Heading,
+  Paragraph,
+  Text,
+} from "./confluence/document-model";
 
-const samplePage: ADFDocument = {
-  type: "doc",
-  version: 1,
-  content: [
-    {
-      type: "heading",
-      content: [
-        { type: "text", text: "This is a " },
-        {
-          type: "text",
-          text: "title",
-          marks: [{ type: "textColor", attrs: { color: "red" } }],
-        },
-      ],
-      attrs: { level: 1 },
-    },
-    {
-      type: "paragraph",
-      content: [{ type: "text", text: "This is a paragraph" }],
-    },
-    {
-      type: "paragraph",
-      content: [{ type: "text", text: "This is a paragraph 2" }],
-    },
-    {
-      type: "heading",
-      content: [{ type: "text", text: "This an header 2" }],
-      attrs: { level: 2 },
-    },
-    {
-      type: "paragraph",
-      content: [{ type: "text", text: "This is a paragraph 3" }],
-    },
-    {
-      type: "paragraph",
-      content: [
-        { type: "text", text: "This is a paragraph 4" },
-        {
-          type: "text",
-          text: "Title",
-          marks: [{ type: "link", attrs: { href: "#This is a title" } }],
-        },
-      ],
-    },
-  ],
-};
+const samplePage = ADFDocument([
+  Heading([Text("This is a "), Text("title", { color: "red" })], 1),
+  Paragraph([Text("This is a paragraph")]),
+  Paragraph([Text("This is a paragraph 2")]),
+
+  Heading([Text("This is an header 2")], 2),
+  Paragraph([Text("This is a paragraph 3")]),
+
+  Paragraph([
+    Text("This is a paragraph 4 "),
+    Text("link", { href: "#This is a title" }),
+  ]),
+]);
 
 async function main() {
   const confluenceClient = ConfluenceClient({
