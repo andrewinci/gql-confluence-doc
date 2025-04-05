@@ -10,7 +10,7 @@ export const ADFDocument = (content: Node[]): ADFDocument => ({
   version: 1,
 });
 
-type Node = Paragraph | Text | Heading;
+type Node = Paragraph | Text | Heading | TableOfContent;
 
 /*************** Paragraph node ***************/
 type Paragraph = {
@@ -69,4 +69,57 @@ export const Heading = (content: Text[], level: 1 | 2 | 3 | 4): Heading => ({
   type: "heading",
   attrs: { level },
   content,
+});
+
+/*************** Table of content node ***************/
+type TableOfContent = {
+  type: "extension";
+  attrs: {
+    layout: "default";
+    extensionType: "com.atlassian.confluence.macro.core";
+    extensionKey: "toc";
+    parameters: {
+      macroParams: {
+        style: {
+          value: "none";
+        };
+      };
+      macroMetadata: {
+        macroId: {
+          value: "6310d33d-eb5a-4c12-a479-a1ff44ff9d9f";
+        };
+        schemaVersion: {
+          value: "1";
+        };
+        title: "Table of Contents";
+      };
+    };
+    localId: "9374c8ac-9ac7-4194-9b3f-0b67ab4cfd6b";
+  };
+};
+
+export const TableOfContent = ():TableOfContent => ({
+  type: "extension",
+  attrs: {
+    layout: "default",
+    extensionType: "com.atlassian.confluence.macro.core",
+    extensionKey: "toc",
+    parameters: {
+      macroParams: {
+        style: {
+          value: "none",
+        },
+      },
+      macroMetadata: {
+        macroId: {
+          value: "6310d33d-eb5a-4c12-a479-a1ff44ff9d9f",
+        },
+        schemaVersion: {
+          value: "1",
+        },
+        title: "Table of Contents",
+      },
+    },
+    localId: "9374c8ac-9ac7-4194-9b3f-0b67ab4cfd6b",
+  },
 });

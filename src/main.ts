@@ -3,10 +3,12 @@ import {
   ADFDocument,
   Heading,
   Paragraph,
+  TableOfContent,
   Text,
 } from "./confluence/document-model";
 
 const samplePage = ADFDocument([
+  TableOfContent(),
   Heading([Text("This is a "), Text("title", { color: "red" })], 1),
   Paragraph([Text("This is a paragraph", {strong: true})]),
   Paragraph([Text("This is a paragraph 2", {italic: true, color: "green"})]),
