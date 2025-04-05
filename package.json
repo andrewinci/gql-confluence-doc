@@ -4,13 +4,14 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
-    "start": "tsx ."
+    "start": "tsx --env-file=.env ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.7.0",
   "devDependencies": {
+    "@types/node": "^22.14.0",
     "tsx": "^4.19.3"
   }
 }
