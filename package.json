@@ -1,0 +1,16 @@
+{
+  "name": "gql-confluence-doc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "tsx ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.7.0",
+  "devDependencies": {
+    "tsx": "^4.19.3"
+  }
+}
