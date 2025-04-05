@@ -1,4 +1,5 @@
 import path from "path";
+import { ADFDocument } from "./document-model";
 
 type ConfluenceConfig = {
   domain: string;
@@ -10,7 +11,7 @@ type ConfluencePage = {
   id: string;
   title: string;
   spaceId: string;
-  body: Document;
+  body: ADFDocument;
   currentVersion: number;
 };
 
@@ -34,7 +35,7 @@ interface ConfluenceClient {
     id: string,
     opts: {
       title: string;
-      body: Document;
+      body: ADFDocument;
       version: number;
     },
   ): Promise<void>;
@@ -81,7 +82,7 @@ export function ConfluenceClient(configs: ConfluenceConfig): ConfluenceClient {
       id: string,
       opts: {
         title: string;
-        body: Document;
+        body: ADFDocument;
         version: number;
       },
     ): Promise<void> {
@@ -112,9 +113,3 @@ export function ConfluenceClient(configs: ConfluenceConfig): ConfluenceClient {
     },
   };
 }
-
-type Document = {
-  type: "doc";
-  content: unknown;
-  version: 1;
-};

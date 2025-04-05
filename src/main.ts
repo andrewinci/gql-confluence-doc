@@ -1,4 +1,4 @@
-import { ConfluenceClient } from "./confluence";
+import { ConfluenceClient } from "./confluence/client";
 
 async function main() {
   const confluenceClient = ConfluenceClient({
