@@ -85,9 +85,6 @@ type Table = {
 
 type TableRow = {
   type: "tableRow";
-  attrs?: {
-    background?: Color;
-  };
   content: TableHeader[] | TableCell[];
 };
 
@@ -119,13 +116,22 @@ export const Table = (rows: TableRow[]): Table => {
 };
 
 export const TableRow = (
-  content: TableHeader[] | TableCell[]
+  content: TableHeader[] | TableCell[],
+  opts?: { background: Color },
 ): TableRow => ({
   type: "tableRow",
-  content,
+  content: content.map((c) => ({
+    ...c,
+    attrs: {
+      ...(opts?.background ? { background: opts.background } : c.attrs),
+    },
+  })),
 });
 
-export const TableHeader = (content: Paragraph[], opts?:{ background: Color}): TableHeader => ({
+export const TableHeader = (
+  content: Paragraph[],
+  opts?: { background: Color },
+): TableHeader => ({
   type: "tableHeader",
   attrs: {
     ...(opts?.background ? { background: opts.background } : {}),

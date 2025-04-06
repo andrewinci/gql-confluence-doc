@@ -30,7 +30,7 @@ const samplePage = ADFDocument([
       TableRow([
         TableHeader([Paragraph(Text("Header Col 1", { strong: true }))]),
         TableHeader([Paragraph(Text("Header Col 2", { strong: true }))]),
-      ]),
+      ], {background: "#3e3ec2"}),
       TableRow([
         TableCell([
           Paragraph(Text("Col 1, Row 1")),
@@ -40,7 +40,7 @@ const samplePage = ADFDocument([
           Paragraph(Text("Col 2, Row 1")),
           Paragraph(Text("Col 2, Row 1", { color: "red" })),
         ]),
-      ]),
+      ], {background: "red"}),
       TableRow([
         TableCell(
           [Paragraph(Text("Col 1, Row 2")), Paragraph(Text("Col 1, Row 2"))],
