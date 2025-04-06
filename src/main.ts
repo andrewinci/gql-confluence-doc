@@ -2,12 +2,11 @@ import { ConfluenceClient } from "./confluence/client";
 import { loadGqlSchema } from "./gql/schema";
 import { BasicTemplate } from "./templates/basic";
 
-
 async function main() {
   // load graphql schema
-  const schema = await loadGqlSchema("./test1.gql", "./test.gql")  
+  const schema = await loadGqlSchema("./test1.gql", "./test.gql");
   // parse schema to ADFDocument
-  const content = BasicTemplate.parse(schema)
+  const content = BasicTemplate.parse(schema);
   // post to confluence
   const confluenceClient = ConfluenceClient({
     domain: process.env.CONFLUENCE_DOMAIN!,

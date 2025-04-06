@@ -3,5 +3,5 @@ import { ADFDocument } from "../confluence/document-model";
 
 export interface GqlConfluenceTemplate {
   name: string;
-  parse(schema: GraphQLSchema): ADFDocument 
+  parse(schema: GraphQLSchema): ADFDocument;
 }

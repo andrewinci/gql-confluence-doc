@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
-    "start": "tsx --env-file=.env ."
+    "start": "tsx --env-file=.env .",
+    "pretty": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -12,6 +13,7 @@
   "packageManager": "pnpm@10.7.0",
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "prettier": "3.5.3",
     "tsx": "^4.19.3"
   },
   "dependencies": {

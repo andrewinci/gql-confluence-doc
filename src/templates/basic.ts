@@ -24,7 +24,7 @@ import {
   TableOfContent,
 } from "../confluence/document-model";
 
-const TABLE_HEADER_BACKGROUND = "#b3d4ff"
+const TABLE_HEADER_BACKGROUND = "#b3d4ff";
 
 export const BasicTemplate: GqlConfluenceTemplate = {
   name: "basic",
@@ -175,6 +175,3 @@ const parseDescription = (d: string | null | undefined): ADFNode[] => {
   if (!d) return [];
   else return [Text(d)];
 };
-
-
-
