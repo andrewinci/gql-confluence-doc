@@ -1,7 +1,10 @@
 import { ConfluenceClient } from "./confluence/client";
 import {
   ADFDocument,
+  BulletList,
+  HardBreak,
   Heading,
+  ListItem,
   Paragraph,
   Status,
   Table,
@@ -19,7 +22,7 @@ const samplePage = ADFDocument([
   Paragraph(Text("This is a paragraph 2", { italic: true, color: "green" })),
 
   Heading(2, Text("This is an header 2")),
-  Paragraph(Text("This is a paragraph 3"), Status("deprecated", "red")),
+  Paragraph(Text("This is a paragraph 3 "), Status("deprecated", "red")),
 
   Paragraph(
     Text("This is a paragraph 4 "),
@@ -28,20 +31,26 @@ const samplePage = ADFDocument([
 
   Paragraph(
     Table([
-      TableRow([
-        TableHeader([Paragraph(Text("Header Col 1", { strong: true }))]),
-        TableHeader([Paragraph(Text("Header Col 2", { strong: true }))]),
-      ], {background: "#3e3ec2"}),
-      TableRow([
-        TableCell([
-          Paragraph(Text("Col 1, Row 1")),
-          Paragraph(Text("Col 1, Row 1")),
-        ]),
-        TableCell([
-          Paragraph(Text("Col 2, Row 1")),
-          Paragraph(Text("Col 2, Row 1", { color: "red" })),
-        ]),
-      ], {background: "red"}),
+      TableRow(
+        [
+          TableHeader([Paragraph(Text("Header Col 1", { strong: true }))]),
+          TableHeader([Paragraph(Text("Header Col 2", { strong: true }))]),
+        ],
+        { background: "#3e3ec2" },
+      ),
+      TableRow(
+        [
+          TableCell([
+            Paragraph(Text("Col 1, Row 1")),
+            Paragraph(Text("Col 1, Row 1")),
+          ]),
+          TableCell([
+            Paragraph(Text("Col 2, Row 1")),
+            Paragraph(Text("Col 2, Row 1", { color: "red" })),
+          ]),
+        ],
+        { background: "red" },
+      ),
       TableRow([
         TableCell(
           [Paragraph(Text("Col 1, Row 2")), Paragraph(Text("Col 1, Row 2"))],
@@ -53,6 +62,23 @@ const samplePage = ADFDocument([
         ]),
       ]),
     ]),
+  ),
+
+  Paragraph(
+    BulletList(
+      ListItem(
+        Text("item 1"),
+        BulletList(
+          ListItem(Text("Item 2"), BulletList(ListItem(Text("Item 3")))),
+          ListItem(
+            Text("Item 4"),
+            HardBreak(),
+            Text("This is another sub text"),
+          ),
+        ),
+      ),
+      ListItem(Text("item 5"), HardBreak(), Text("This is sub text 2")),
+    ),
   ),
 ]);
 

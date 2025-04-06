@@ -1,4 +1,16 @@
+import { type } from "os";
+
 type Color = string;
+
+type Node =
+  | Paragraph
+  | Text
+  | Heading
+  | TableOfContent
+  | Table
+  | Status
+  | BulletList
+  | HardBreak;
 
 export type ADFDocument = {
   type: "doc";
@@ -11,8 +23,6 @@ export const ADFDocument = (content: Node[]): ADFDocument => ({
   content,
   version: 1,
 });
-
-type Node = Paragraph | Text | Heading | TableOfContent | Table | Status;
 
 /*************** Paragraph node ***************/
 type Paragraph = {
@@ -149,28 +159,57 @@ export const TableCell = (
   content,
 });
 
-
 /*************** Status node ***************/
 
 type Status = {
-  type: "status",
+  type: "status";
   attrs: {
-    color: Color,
-    style: "bold",
-    text: string
-  }
-}
+    color: Color;
+    style: "bold";
+    text: string;
+  };
+};
 
 export const Status = (text: string, color: Color): Status => {
-  return ({
+  return {
     type: "status",
     attrs: {
       color,
       text,
-      style: "bold"
-    }
-  })
-}
+      style: "bold",
+    },
+  };
+};
+
+/*************** Bullet list node ***************/
+type BulletList = {
+  type: "bulletList";
+  content: ListItem[];
+};
+
+type ListItem = {
+  type: "listItem";
+  content: Node[];
+};
+
+export const BulletList = (...content: ListItem[]): BulletList => ({
+  type: "bulletList",
+  content,
+});
+
+export const ListItem = (...content: Node[]): ListItem => ({
+  type: "listItem",
+  content,
+});
+
+/*************** Hard Break node ***************/
+type HardBreak = {
+  type: "hardBreak";
+};
+
+export const HardBreak = (): HardBreak => ({
+  type: "hardBreak",
+});
 
 /*************** Table of content node ***************/
 type TableOfContent = {
