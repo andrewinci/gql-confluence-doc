@@ -1,18 +1,30 @@
 {
   "name": "gql-confluence-doc",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "",
   "main": "src/main.ts",
+  "type": "module",
+  "bin": {
+    "gql-confluence-doc": "bin/index.js"
+  },
+  "files": [
+    "bin"
+  ],
   "scripts": {
+    "build": "esbuild src/main.ts --platform=node --bundle --outfile=bin/index.js",
     "start": "tsx --env-file=.env .",
-    "pretty": "prettier --write ."
+    "pretty": "prettier --write .",
+    "release": "np",
+    "test": "echo 'No tests yet'"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Andrea Vinci",
+  "license": "MIT",
   "packageManager": "pnpm@10.7.0",
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "esbuild": "0.25.2",
+    "np": "^10.2.0",
     "prettier": "3.5.3",
     "tsx": "^4.19.3"
   },

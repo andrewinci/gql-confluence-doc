@@ -1,8 +1,10 @@
+#!/usr/bin/env node
+
 import { ConfluenceClient } from "./confluence/client";
 import { loadGqlSchema } from "./gql/schema";
 import { BasicTemplate } from "./templates/basic";
 
-async function main() {
+async function test() {
   // load graphql schema
   const schema = await loadGqlSchema("./test1.gql", "./test.gql");
   // parse schema to ADFDocument
@@ -20,6 +22,10 @@ async function main() {
     body: content,
     version: page.currentVersion + 1,
   });
+}
+
+async function main() {
+  console.log("gql to confluence");
 }
 
 main();
