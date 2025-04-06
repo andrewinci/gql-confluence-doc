@@ -12,7 +12,7 @@ export const ADFDocument = (content: Node[]): ADFDocument => ({
   version: 1,
 });
 
-type Node = Paragraph | Text | Heading | TableOfContent | Table;
+type Node = Paragraph | Text | Heading | TableOfContent | Table | Status;
 
 /*************** Paragraph node ***************/
 type Paragraph = {
@@ -149,6 +149,29 @@ export const TableCell = (
   content,
 });
 
+
+/*************** Status node ***************/
+
+type Status = {
+  type: "status",
+  attrs: {
+    color: Color,
+    style: "bold",
+    text: string
+  }
+}
+
+export const Status = (text: string, color: Color): Status => {
+  return ({
+    type: "status",
+    attrs: {
+      color,
+      text,
+      style: "bold"
+    }
+  })
+}
+
 /*************** Table of content node ***************/
 type TableOfContent = {
   type: "extension";
@@ -172,7 +195,6 @@ type TableOfContent = {
         title: "Table of Contents";
       };
     };
-    localId: "9374c8ac-9ac7-4194-9b3f-0b67ab4cfd6b";
   };
 };
 
@@ -198,6 +220,5 @@ export const TableOfContent = (): TableOfContent => ({
         title: "Table of Contents",
       },
     },
-    localId: "9374c8ac-9ac7-4194-9b3f-0b67ab4cfd6b",
   },
 });

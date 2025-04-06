@@ -3,6 +3,7 @@ import {
   ADFDocument,
   Heading,
   Paragraph,
+  Status,
   Table,
   TableCell,
   TableHeader,
@@ -18,7 +19,7 @@ const samplePage = ADFDocument([
   Paragraph(Text("This is a paragraph 2", { italic: true, color: "green" })),
 
   Heading(2, Text("This is an header 2")),
-  Paragraph(Text("This is a paragraph 3")),
+  Paragraph(Text("This is a paragraph 3"), Status("deprecated", "red")),
 
   Paragraph(
     Text("This is a paragraph 4 "),
