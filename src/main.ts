@@ -14,6 +14,7 @@ import {
   TableRow,
   Text,
 } from "./confluence/document-model";
+import { loadGqlSchema } from "./gql/schema";
 
 const samplePage = ADFDocument([
   TableOfContent(),
@@ -89,13 +90,15 @@ async function main() {
     user: process.env.CONFLUENCE_USER!,
   });
   const page = await confluenceClient.getPageById("294913");
-  console.log("Page found", JSON.stringify(page, null, 2));
   // NOTE: when updating any comment will be lost
   await confluenceClient.updatePage(page.id, {
     title: "New title",
     body: samplePage,
     version: page.currentVersion + 1,
   });
+
+  const schema = await loadGqlSchema("./test1.gql", "./test.gql")  
+  console.log(schema.getQueryType()?.getFields()["name"])
 }
 
 main();

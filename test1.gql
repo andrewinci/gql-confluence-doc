@@ -1,0 +1,5 @@
+scalar Void
+
+type Query {
+  __empty: Void
+}
