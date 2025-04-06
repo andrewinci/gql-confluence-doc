@@ -1,8 +1,6 @@
-import { type } from "os";
-
 type Color = string;
 
-type Node =
+export type ADFNode =
   | Paragraph
   | Text
   | Heading
@@ -14,11 +12,11 @@ type Node =
 
 export type ADFDocument = {
   type: "doc";
-  content: Node[];
+  content: ADFNode[];
   version: 1;
 };
 
-export const ADFDocument = (content: Node[]): ADFDocument => ({
+export const ADFDocument = (content: ADFNode[]): ADFDocument => ({
   type: "doc",
   content,
   version: 1,
@@ -27,10 +25,10 @@ export const ADFDocument = (content: Node[]): ADFDocument => ({
 /*************** Paragraph node ***************/
 type Paragraph = {
   type: "paragraph";
-  content: Node[];
+  content: ADFNode[];
 };
 
-export const Paragraph = (...content: Node[]): Paragraph => ({
+export const Paragraph = (...content: ADFNode[]): Paragraph => ({
   type: "paragraph",
   content,
 });
@@ -189,7 +187,7 @@ type BulletList = {
 
 type ListItem = {
   type: "listItem";
-  content: Node[];
+  content: ADFNode[];
 };
 
 export const BulletList = (...content: ListItem[]): BulletList => ({
@@ -197,7 +195,7 @@ export const BulletList = (...content: ListItem[]): BulletList => ({
   content,
 });
 
-export const ListItem = (...content: Node[]): ListItem => ({
+export const ListItem = (...content: ADFNode[]): ListItem => ({
   type: "listItem",
   content,
 });
