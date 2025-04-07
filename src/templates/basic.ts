@@ -57,67 +57,52 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       documentBody.push(...parseGqlType(mutation));
     }
 
-    const objects = publicTypes
-      .filter((t) => isObjectType(t) && !isEnumType(t) && !isScalarType(t))
-      .filter((t) => !["Mutation", "Query"].includes(t.name));
-    if (objects.length > 0) {
-      documentBody.push(Heading(1, Text("Objects")));
-      documentBody.push(
-        ...objects
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
-          .flatMap((t) => parseGqlType(t, { withHeader: true })),
-      );
-    }
-
-    const inputs = publicTypes.filter((t) => isInputObjectType(t));
-    if (inputs.length > 0) {
-      documentBody.push(Heading(1, Text("Inputs")));
-      documentBody.push(
-        ...inputs
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
-          .flatMap((t) => parseGqlType(t, { withHeader: true })),
-      );
-    }
-
-    const unions = publicTypes.filter((t) => isUnionType(t));
-    if (unions.length > 0) {
-      documentBody.push(Heading(1, Text("Unions")));
-      documentBody.push(
-        ...unions
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
-          .flatMap((t) => parseGqlType(t, { withHeader: true })),
-      );
-    }
-
-    const enums = publicTypes.filter(isEnumType);
-    if (enums.length > 0) {
-      documentBody.push(Heading(1, Text("Enums")));
-      documentBody.push(
-        ...enums
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
-          .flatMap((t) => parseGqlType(t, { withHeader: true })),
-      );
-    }
-
-    const scalars = publicTypes.filter(isScalarType);
-    if (scalars.length > 0) {
-      documentBody.push(Heading(1, Text("Scalars")));
-      documentBody.push(
-        ...scalars
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
-          .flatMap((t) => parseGqlType(t, { withHeader: true })),
-      );
-    }
+    // parse objects
+    documentBody.push(
+      ...parseGqlTypes(
+        "Objects",
+        publicTypes
+          .filter((t) => isObjectType(t) && !isEnumType(t) && !isScalarType(t))
+          .filter((t) => !["Mutation", "Query"].includes(t.name)),
+      ),
+    );
+    //parse inputs
+    documentBody.push(
+      ...parseGqlTypes("Inputs", publicTypes.filter(isInputObjectType)),
+    );
+    //parse unions
+    documentBody.push(
+      ...parseGqlTypes("Unions", publicTypes.filter(isUnionType)),
+    );
+    //parse enums
+    documentBody.push(
+      ...parseGqlTypes("Enums", publicTypes.filter(isEnumType)),
+    );
+    // parse scalars
+    documentBody.push(
+      ...parseGqlTypes("Scalars", publicTypes.filter(isScalarType)),
+    );
 
     return ADFDocument([TableOfContent(), ...documentBody]);
   },
 };
 
+const parseGqlTypes = (name: string, types: GraphQLNamedType[]): ADFNode[] => {
+  const documentBody = [] as ADFNode[];
+  if (types.length > 0) {
+    documentBody.push(Heading(1, Text(name)));
+    documentBody.push(
+      ...types
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort(
+          (a, b) =>
+            (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0),
+        )
+        .flatMap((t) => parseGqlType(t, { withHeader: true })),
+    );
+  }
+  return documentBody;
+};
 
 const parseGqlType = (
   t: GraphQLNamedType,
