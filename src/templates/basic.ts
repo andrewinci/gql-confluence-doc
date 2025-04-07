@@ -95,8 +95,9 @@ const parseGqlTypes = (name: string, types: GraphQLNamedType[]): ADFNode[] => {
         .sort((a, b) => a.name.localeCompare(b.name))
         .sort(
           (a, b) =>
-            (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0),
+            (deprecationReason(b) ? 1 : 0) - (deprecationReason(a) ? 1 : 0),
         )
+        .sort((a, b) => (isNew(b) ? 1 : 0) - (isNew(a) ? 1 : 0))
         .flatMap((t) => parseGqlType(t, { withHeader: true })),
     );
   }
