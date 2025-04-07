@@ -35,6 +35,10 @@ program
   .command("check-page")
   .description("Retrieve info about the page in confluence")
   .argument("<page-id>", "The confluence page id")
+  .option(
+    "-c,--content",
+    "If provided, dump the content of the page in ADF format to the stdout",
+  )
   .requiredOption("-d,--domain <domain>", "the confluence domain to use")
   .requiredOption(
     "-t,--token <token>",
@@ -52,7 +56,8 @@ program
     console.log(`Page title: ${page.title}`);
     console.log(`Page version: ${page.currentVersion}`);
     console.log(`Page spaceId: ${page.spaceId}`);
-    console.log(`Page content:\n${JSON.stringify(page.body, null, 2)}`);
+    if (options.content)
+      console.log(`Page content:\n${JSON.stringify(page.body, null, 2)}`);
   });
 
 program.parse();

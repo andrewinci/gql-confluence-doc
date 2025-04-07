@@ -13,7 +13,7 @@
     "build": "esbuild src/main.ts --platform=node --bundle --outfile=bin/index.js",
     "start": "tsx --env-file=.env .",
     "pretty": "prettier --write .",
-    "release": "np",
+    "release": "pnpm pretty && pnpm build && np",
     "test": "echo 'No tests yet'"
   },
   "keywords": [],
