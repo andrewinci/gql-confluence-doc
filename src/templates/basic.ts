@@ -153,7 +153,10 @@ const getOutputTypeName = (
   t: GraphQLOutputType | GraphQLInputType,
 ): [string, string] => {
   const outType = t.toJSON();
-  return [outType, outType.replace("!", "").replace("[", "").replace("]", "")];
+  return [
+    outType,
+    outType.replaceAll("!", "").replaceAll("[", "").replaceAll("]", ""),
+  ];
 };
 
 const fieldsTable = (fields: GraphQLField<any, any, any>[]): ADFNode => {
