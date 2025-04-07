@@ -1,10 +1,14 @@
 import {
+  ConstDirectiveNode,
+  DirectiveNode,
+  GraphQLDirective,
   GraphQLEnumType,
   GraphQLField,
   GraphQLInputType,
   GraphQLNamedType,
   GraphQLOutputType,
   GraphQLSchema,
+  GraphQLType,
   isEnumType,
   isInputObjectType,
   isInputType,
@@ -34,6 +38,7 @@ const TABLE_HEADER_BACKGROUND = "#b3d4ff";
 
 export const BasicTemplate: GqlConfluenceTemplate = {
   name: "basic",
+
   parse(schema: GraphQLSchema): ADFDocument {
     const documentBody = [] as ADFNode[];
     const publicTypes = Object.values(schema.getTypeMap()).filter(
@@ -60,6 +65,7 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       documentBody.push(
         ...objects
           .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
           .flatMap((t) => parseGqlType(t, { withHeader: true })),
       );
     }
@@ -70,6 +76,7 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       documentBody.push(
         ...inputs
           .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
           .flatMap((t) => parseGqlType(t, { withHeader: true })),
       );
     }
@@ -80,6 +87,7 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       documentBody.push(
         ...unions
           .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
           .flatMap((t) => parseGqlType(t, { withHeader: true })),
       );
     }
@@ -90,6 +98,7 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       documentBody.push(
         ...enums
           .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
           .flatMap((t) => parseGqlType(t, { withHeader: true })),
       );
     }
@@ -100,6 +109,7 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       documentBody.push(
         ...scalars
           .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => (deprecationReason(a) ? 1 : 0) - (deprecationReason(b) ? 1 : 0))
           .flatMap((t) => parseGqlType(t, { withHeader: true })),
       );
     }
@@ -107,6 +117,7 @@ export const BasicTemplate: GqlConfluenceTemplate = {
     return ADFDocument([TableOfContent(), ...documentBody]);
   },
 };
+
 
 const parseGqlType = (
   t: GraphQLNamedType,
@@ -130,6 +141,17 @@ const parseGqlType = (
     } else if (isInputObjectType(t)) {
       res.push(Paragraph(Status("input", "purple")));
     }
+
+    // add deprecation badge
+    if (deprecationReason(t))
+      res.push(
+        Paragraph(
+          Text(`⚠️ deprecated: ${deprecationReason(t)}`, {
+            strong: true,
+            color: "red",
+          }),
+        ),
+      );
   }
 
   // add description if available
@@ -154,30 +176,20 @@ const parseGqlType = (
   if (isUnionType(t)) {
     const items = t
       .getTypes()
-      .map((t) => getOutputTypeName(t))
+      .map((t) => getTypeName(t))
       .map(([name, url]) => ListItem(Text(name, { href: `##${url}` })));
     res.push(Paragraph(Text("Union of"), BulletList(...items)));
   }
   return res;
 };
 
-const getOutputTypeName = (
-  t: GraphQLOutputType | GraphQLInputType,
-): [string, string] => {
-  const outType = t.toJSON();
-  return [
-    outType,
-    outType.replaceAll("!", "").replaceAll("[", "").replaceAll("]", ""),
-  ];
-};
-
 const fieldsTable = (fields: GraphQLField<any, any, any>[]): ADFNode => {
   const fieldRows = fields.map((f) => {
-    const [name, url] = getOutputTypeName(f.type);
+    const [name, url] = getTypeName(f.type);
     let fArgs = [] as ADFNode[];
     if ("args" in f) {
       const args = f.args.flatMap((a, i, arr) => {
-        const [name, url] = getOutputTypeName(a.type);
+        const [name, url] = getTypeName(a.type);
         return [
           Text(`\t${a.name}:`, { italic: true }),
           Text(name, { href: `##${url}` }),
@@ -247,11 +259,30 @@ const parseDescription = (
   const res = [] as ADFNode[];
   if (deprecationReason)
     res.push(
-      Text(`Deprecated - ${deprecationReason}\n`, {
+      Text(`deprecated - ${deprecationReason}\n`, {
         strong: true,
         color: "red",
       }),
     );
   if (d) res.push(Text(d));
   return res;
+};
+
+const deprecationReason = (t: GraphQLType): string | null => {
+  const directives = (t["astNode"]?.["directives"] ?? []) as DirectiveNode[];
+  const deprecated = directives.filter((d) => d.name.value === "deprecated");
+  const deprecationReason =
+    deprecated[0]?.arguments?.[0]?.["value"]?.["value"] ??
+    "No longer supported";
+  return deprecated.length > 0 ? deprecationReason : null;
+};
+
+const getTypeName = (
+  t: GraphQLOutputType | GraphQLInputType,
+): [string, string] => {
+  const outType = t.toJSON();
+  return [
+    outType,
+    outType.replaceAll("!", "").replaceAll("[", "").replaceAll("]", ""),
+  ];
 };

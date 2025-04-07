@@ -25,7 +25,15 @@ enum SampleEnum {
   C
 }
 
-input TestInput {
+type DeprecatedObject @deprecated(reason: "use another type instead. This is an old one.") {
+  sample: [Nested!]!
+}
+
+# directive @deprecated(
+#   reason: String
+# ) on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | INPUT_OBJECT | ENUM | ENUM_VALUE | OBJECT | UNION
+
+input TestInput @deprecated {
   nameInput: String!
 }
 
@@ -34,3 +42,13 @@ input TestInput2 {
 }
 
 union SampleUnion = Nested
+
+type A @deprecated {
+  aField: String!
+}
+type B {
+  bField: String!
+}
+type C {
+  cField: String!
+}
