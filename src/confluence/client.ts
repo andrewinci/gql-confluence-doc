@@ -1,7 +1,7 @@
 import path from "path";
 import { ADFDocument } from "./document-model";
 
-type ConfluenceConfig = {
+export type ConfluenceConfig = {
   domain: string;
   user: string;
   token: string;
@@ -29,7 +29,7 @@ type UpdatePageRequest = {
   };
 };
 
-interface ConfluenceClient {
+export interface ConfluenceClient {
   getPageById(id: string): Promise<ConfluencePage>;
   updatePage(
     id: string,

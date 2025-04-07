@@ -1,18 +1,74 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import { ConfluenceClient } from "./confluence/client";
+import { ConfluenceClient, ConfluenceConfig } from "./confluence/client";
 import { loadGqlSchema } from "./gql/schema";
 import { BasicTemplate } from "./templates/basic";
 import { version } from "../package.json";
 import chalk from "chalk";
-import { confirm } from "@inquirer/prompts";
+import { confirm, input } from "@inquirer/prompts";
+import { readFile, writeFile } from "fs/promises";
+import path from "path";
+import os from "os";
+import { exit } from "process";
+
+const CONFIG_PATH = path.join(os.homedir(), ".gqlconfluence.config");
+
+const loadConfig = async (): Promise<ConfluenceConfig> => {
+  const content = await readFile(CONFIG_PATH, "utf8");
+  return JSON.parse(content);
+};
+
+const buildConfluenceClient = async (): Promise<ConfluenceClient> => {
+  try {
+    const config = await loadConfig();
+    return ConfluenceClient(config);
+  } catch {
+    console.log(
+      chalk.red(
+        "Unable to retrieve the credentials. Make sure to run the `setup` command before using the tool.",
+      ),
+    );
+    exit(-1);
+  }
+};
 
 program
   .name("gql-confluence")
   .description("Tool to generate confluence documentation for graphql")
   .version(version);
 
+// setup credentials command
+program
+  .command("setup")
+  .description("Setup confluence credentials")
+  .action(async () => {
+    console.log("Setup confluence credentials");
+    const email = await input({ message: "Confluence email" });
+    const domain = await input({
+      message: "Confluence domain (e.g. https://myspace.atlassian.net/)",
+    });
+    const token = await input({
+      message:
+        "Confluence token. Generate one at https://id.atlassian.com/manage-profile/security/api-tokens}",
+    });
+    const res = await confirm({
+      message: `Config will be written to ${CONFIG_PATH}, any previous configuration will be overwritten.\nContinue?`,
+    });
+    if (res) {
+      await writeFile(
+        CONFIG_PATH,
+        JSON.stringify({
+          user: email,
+          domain,
+          token,
+        }),
+        { flag: "w+" },
+      );
+    }
+  });
+
+// check page command (more for testing)
 program
   .command("check-page")
   .description("retrieve info about the page in confluence")
@@ -21,19 +77,9 @@ program
     "-c,--content",
     "If provided, dump the content of the page in ADF format to the stdout",
   )
-  .requiredOption("-d,--domain <domain>", "the confluence domain to use")
-  .requiredOption(
-    "-t,--token <token>",
-    "the confluence token to use. Generate one at https://id.atlassian.com/manage-profile/security/api-tokens",
-  )
-  .requiredOption("-u,--user <user>", "the confluence user email")
   .action(async (pageId, options) => {
-    const confluenceClient = ConfluenceClient({
-      domain: options.domain,
-      token: options.token,
-      user: options.user,
-    });
-    const page = await confluenceClient.getPageById(pageId);
+    const client = await buildConfluenceClient();
+    const page = await client.getPageById(pageId);
     console.log(chalk.green.bold(`✔ Page ${page.id} found`));
     console.log(` title: ${page.title}`);
     console.log(` version: ${page.currentVersion}`);
@@ -47,18 +93,8 @@ program
   .description("parse gql to confluence format and publish")
   .argument("<gqlFiles...>", "List of gql files to parse")
   .requiredOption("-p,--page-id <pageId>", "The confluence page id")
-  .requiredOption("-d,--domain <domain>", "the confluence domain to use")
-  .requiredOption(
-    "-t,--token <token>",
-    "the confluence token to use. Generate one at https://id.atlassian.com/manage-profile/security/api-tokens",
-  )
-  .requiredOption("-u,--user <user>", "the confluence user email")
   .action(async (files: string[], options) => {
-    const confluenceClient = ConfluenceClient({
-      domain: options.domain,
-      token: options.token,
-      user: options.user,
-    });
+    const confluenceClient = await buildConfluenceClient();
 
     // check if the page exists in confluence
     const page = await confluenceClient.getPageById(options.pageId);
