@@ -7,6 +7,12 @@ settings:
 importers:
   .:
     dependencies:
+      "@inquirer/prompts":
+        specifier: ^7.4.1
+        version: 7.4.1(@types/node@22.14.0)
+      chalk:
+        specifier: ^5.4.1
+        version: 5.4.1
       commander:
         specifier: ^13.1.0
         version: 13.1.0

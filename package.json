@@ -28,6 +28,8 @@
     "tsx": "^4.19.3"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.4.1",
+    "chalk": "^5.4.1",
     "commander": "^13.1.0",
     "graphql": "^16.10.0"
   }

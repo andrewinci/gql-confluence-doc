@@ -5,26 +5,8 @@ import { ConfluenceClient } from "./confluence/client";
 import { loadGqlSchema } from "./gql/schema";
 import { BasicTemplate } from "./templates/basic";
 import { version } from "../package.json";
-
-async function test() {
-  // load graphql schema
-  const schema = await loadGqlSchema("./test1.gql", "./test.gql");
-  // parse schema to ADFDocument
-  const content = BasicTemplate.parse(schema);
-  // post to confluence
-  const confluenceClient = ConfluenceClient({
-    domain: process.env.CONFLUENCE_DOMAIN!,
-    token: process.env.CONFLUENCE_TOKEN!,
-    user: process.env.CONFLUENCE_USER!,
-  });
-  const page = await confluenceClient.getPageById("294913");
-  // NOTE: when updating any comment will be lost
-  await confluenceClient.updatePage(page.id, {
-    title: "New title",
-    body: content,
-    version: page.currentVersion + 1,
-  });
-}
+import chalk from "chalk";
+import { confirm } from "@inquirer/prompts";
 
 program
   .name("gql-confluence")
@@ -33,7 +15,7 @@ program
 
 program
   .command("check-page")
-  .description("Retrieve info about the page in confluence")
+  .description("retrieve info about the page in confluence")
   .argument("<page-id>", "The confluence page id")
   .option(
     "-c,--content",
@@ -52,12 +34,74 @@ program
       user: options.user,
     });
     const page = await confluenceClient.getPageById(pageId);
-    console.log(`Page ${page.id} found`);
-    console.log(`Page title: ${page.title}`);
-    console.log(`Page version: ${page.currentVersion}`);
-    console.log(`Page spaceId: ${page.spaceId}`);
+    console.log(chalk.green.bold(`✔ Page ${page.id} found`));
+    console.log(` title: ${page.title}`);
+    console.log(` version: ${page.currentVersion}`);
+    console.log(` spaceId: ${page.spaceId}`);
     if (options.content)
       console.log(`Page content:\n${JSON.stringify(page.body, null, 2)}`);
+  });
+
+program
+  .command("publish")
+  .description("parse gql to confluence format and publish")
+  .argument("<gqlFiles...>", "List of gql files to parse")
+  .requiredOption("-p,--page-id <pageId>", "The confluence page id")
+  .requiredOption("-d,--domain <domain>", "the confluence domain to use")
+  .requiredOption(
+    "-t,--token <token>",
+    "the confluence token to use. Generate one at https://id.atlassian.com/manage-profile/security/api-tokens",
+  )
+  .requiredOption("-u,--user <user>", "the confluence user email")
+  .action(async (files: string[], options) => {
+    const confluenceClient = ConfluenceClient({
+      domain: options.domain,
+      token: options.token,
+      user: options.user,
+    });
+
+    // check if the page exists in confluence
+    const page = await confluenceClient.getPageById(options.pageId);
+    console.log(
+      chalk.green.bold(
+        `✔ Page ${page.id}, version ${page.currentVersion} found`,
+      ),
+    );
+
+    // load schema
+    const schema = await loadGqlSchema(...files);
+    console.log(
+      chalk.green(
+        `✔ GraphQL schema parsed, ${Object.values(schema.getTypeMap() ?? {}).length} types found`,
+      ),
+    );
+
+    // parse schema to ADFDocument
+    const content = BasicTemplate.parse(schema);
+    console.log(
+      chalk.red(
+        "⚠ The confluence page will be updated with the new content.\nAny manual changes or comments to the current version will be lost.",
+      ),
+    );
+    const answer = await confirm({
+      message: "Are you sure to continue?",
+      default: false,
+    });
+    if (answer) {
+      const newVersion = page.currentVersion + 1;
+      await confluenceClient.updatePage(page.id, {
+        title: page.title,
+        body: content,
+        version: newVersion,
+      });
+      console.log(
+        chalk.green(
+          `✔ Confluence page "${page.title}" updated, new version ${newVersion}`,
+        ),
+      );
+    } else {
+      console.log(`✔ Nothing to do`);
+    }
   });
 
 program.parse();

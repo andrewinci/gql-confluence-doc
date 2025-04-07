@@ -6,6 +6,5 @@ export async function loadGqlSchema(
 ): Promise<GraphQLSchema> {
   // combine all gql files
   const schemas = await Promise.all(filePath.map((fp) => readFile(fp, "utf8")));
-
   return buildSchema(schemas.join("\n"));
 }
