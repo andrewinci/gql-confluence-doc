@@ -1,6 +1,6 @@
 {
   "name": "gql-confluence-doc",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A tool to publish graphql documentation to confluence",
   "main": "src/main.ts",
   "bin": {
