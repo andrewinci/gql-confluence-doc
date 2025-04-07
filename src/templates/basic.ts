@@ -6,6 +6,8 @@ import {
   GraphQLOutputType,
   GraphQLSchema,
   isEnumType,
+  isInputObjectType,
+  isInputType,
   isObjectType,
   isScalarType,
   isUnionType,
@@ -62,7 +64,15 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       );
     }
 
-    //todo: parse input types
+    const inputs = publicTypes.filter((t) => isInputObjectType(t));
+    if (inputs.length > 0) {
+      documentBody.push(Heading(1, Text("Inputs")));
+      documentBody.push(
+        ...inputs
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .flatMap((t) => parseGqlType(t, { withHeader: true })),
+      );
+    }
 
     const unions = publicTypes.filter((t) => isUnionType(t));
     if (unions.length > 0) {
@@ -117,6 +127,8 @@ const parseGqlType = (
       res.push(Paragraph(Status("enum", "red")));
     } else if (isUnionType(t)) {
       res.push(Paragraph(Status("union", "yellow")));
+    } else if (isInputObjectType(t)) {
+      res.push(Paragraph(Status("input", "purple")));
     }
   }
 
@@ -127,7 +139,7 @@ const parseGqlType = (
   }
 
   // add fields table
-  if (isObjectType(t)) {
+  if (isObjectType(t) || isInputObjectType(t)) {
     res.push(
       fieldsTable(
         Object.values(t.getFields()).filter((f) => !f.name.startsWith("_")),
@@ -162,19 +174,22 @@ const getOutputTypeName = (
 const fieldsTable = (fields: GraphQLField<any, any, any>[]): ADFNode => {
   const fieldRows = fields.map((f) => {
     const [name, url] = getOutputTypeName(f.type);
-    const args = f.args.flatMap((a, i, arr) => {
-      const [name, url] = getOutputTypeName(a.type);
-      return [
-        Text(`\t${a.name}:`, { italic: true }),
-        Text(name, { href: `##${url}` }),
-        ...(i === arr.length - 1 ? [] : [Text(","), HardBreak()]),
-      ];
-    });
+    let fArgs = [] as ADFNode[];
+    if ("args" in f) {
+      const args = f.args.flatMap((a, i, arr) => {
+        const [name, url] = getOutputTypeName(a.type);
+        return [
+          Text(`\t${a.name}:`, { italic: true }),
+          Text(name, { href: `##${url}` }),
+          ...(i === arr.length - 1 ? [] : [Text(","), HardBreak()]),
+        ];
+      });
 
-    const fArgs =
-      args.length > 0
-        ? [Text("("), HardBreak(), ...args, HardBreak(), Text(")")]
-        : [];
+      fArgs =
+        args.length > 0
+          ? [Text("("), HardBreak(), ...args, HardBreak(), Text(")")]
+          : [];
+    }
 
     return TableRow([
       TableCell([Paragraph(Text(f.name), ...fArgs)]),
