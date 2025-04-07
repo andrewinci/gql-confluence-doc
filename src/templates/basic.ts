@@ -6,8 +6,8 @@ import {
   GraphQLSchema,
   isEnumType,
   isObjectType,
-  isOutputType,
   isScalarType,
+  isUnionType,
 } from "graphql";
 import { GqlConfluenceTemplate } from ".";
 import {
@@ -22,6 +22,8 @@ import {
   TableHeader,
   TableCell,
   TableOfContent,
+  BulletList,
+  ListItem,
 } from "../confluence/document-model";
 
 const TABLE_HEADER_BACKGROUND = "#b3d4ff";
@@ -53,6 +55,16 @@ export const BasicTemplate: GqlConfluenceTemplate = {
       documentBody.push(Heading(1, Text("Objects")));
       documentBody.push(
         ...objects
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .flatMap((t) => parseGqlType(t, { withHeader: true })),
+      );
+    }
+
+    const unions = publicTypes.filter((t) => isUnionType(t));
+    if (unions.length > 0) {
+      documentBody.push(Heading(1, Text("Unions")));
+      documentBody.push(
+        ...unions
           .sort((a, b) => a.name.localeCompare(b.name))
           .flatMap((t) => parseGqlType(t, { withHeader: true })),
       );
@@ -99,6 +111,8 @@ const parseGqlType = (
       res.push(Paragraph(Status("scalar", "orange")));
     } else if (isEnumType(t)) {
       res.push(Paragraph(Status("enum", "red")));
+    } else if (isUnionType(t)) {
+      res.push(Paragraph(Status("union", "yellow")));
     }
   }
 
@@ -121,6 +135,13 @@ const parseGqlType = (
     res.push(enumOptionsTable(t));
   }
 
+  if (isUnionType(t)) {
+    const items = t
+      .getTypes()
+      .map((t) => getOutputTypeName(t))
+      .map(([name, url]) => ListItem(Text(name, { href: `##${url}` })));
+    res.push(Paragraph(Text("Union of"), BulletList(...items)));
+  }
   return res;
 };
 
