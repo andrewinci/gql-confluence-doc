@@ -140,4 +140,41 @@ program
     }
   });
 
+program
+  .command("push")
+  .description("Push an ADF document to a confluence page")
+  .argument("<file>", "The path to the file containing the json to upload")
+  .requiredOption("-p,--page-id <pageId>", "The confluence page id")
+  .action(async (file: string, options) => {
+    const confluenceClient = await buildConfluenceClient();
+
+    // check if the page exists in confluence
+    const page = await confluenceClient.getPageById(options.pageId);
+    console.log(
+      chalk.green.bold(
+        `✔ Page ${page.id}, version ${page.currentVersion} found`,
+      ),
+    );
+    const content = JSON.parse(await readFile(file, "utf8"));
+    const answer = await confirm({
+      message: "Are you sure to continue?",
+      default: false,
+    });
+    if (answer) {
+      const newVersion = page.currentVersion + 1;
+      await confluenceClient.updatePage(page.id, {
+        title: page.title,
+        body: content,
+        version: newVersion,
+      });
+      console.log(
+        chalk.green(
+          `✔ Confluence page "${page.title}" updated, new version ${newVersion}`,
+        ),
+      );
+    } else {
+      console.log(`✔ Nothing to do`);
+    }
+  });
+
 program.parse();
