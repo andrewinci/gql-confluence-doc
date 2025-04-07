@@ -12,7 +12,7 @@ type Nested {
   id: ID!
   "The name of the nested object"
   name: String! @deprecated
-  sampleEnum: SampleEnum!
+  sampleEnum: SampleEnum! @new
 }
 
 "This is a sample enum"
@@ -22,10 +22,11 @@ enum SampleEnum {
   "An B option"
   B @deprecated
   "An C option"
-  C
+  C @new
 }
 
-type DeprecatedObject @deprecated(reason: "use another type instead. This is an old one.") {
+type DeprecatedObject
+  @deprecated(reason: "use another type instead. This is an old one.") {
   sample: [Nested!]!
 }
 
@@ -49,6 +50,6 @@ type A @deprecated {
 type B {
   bField: String!
 }
-type C {
+type C @new {
   cField: String!
 }

@@ -1,6 +1,7 @@
 import {
   DirectiveNode,
   GraphQLEnumType,
+  GraphQLEnumValue,
   GraphQLField,
   GraphQLInputType,
   GraphQLNamedType,
@@ -125,7 +126,7 @@ const parseGqlType = (
       res.push(Paragraph(Status("input", "purple")));
     }
 
-    // add deprecation badge
+    // add deprecation panel
     if (deprecated)
       res.push(
         Panel(
@@ -137,6 +138,20 @@ const parseGqlType = (
             ),
           ],
           "error",
+        ),
+      );
+
+    if (isNew(t))
+      res.push(
+        Panel(
+          [
+            Paragraph(
+              Text(`New entity`, {
+                strong: true,
+              }),
+            ),
+          ],
+          "success",
         ),
       );
   }
@@ -194,11 +209,19 @@ const fieldsTable = (fields: GraphQLField<any, any, any>[]): ADFNode => {
       [
         TableCell([Paragraph(Text(f.name), ...fArgs)]),
         TableCell([
-          Paragraph(...parseDescription(f.description, f.deprecationReason)),
+          Paragraph(
+            ...parseDescription(f.description, f.deprecationReason, isNew(f)),
+          ),
         ]),
         TableCell([Paragraph(Text(name, { href: `##${url}` }))]),
       ],
-      { background: f.deprecationReason ? "red" : undefined },
+      {
+        background: f.deprecationReason
+          ? "red"
+          : isNew(f)
+            ? "green"
+            : undefined,
+      },
     );
   });
   return Table([
@@ -220,10 +243,18 @@ const enumOptionsTable = (t: GraphQLEnumType): ADFNode => {
       [
         TableCell([Paragraph(Text(v.name))]),
         TableCell([
-          Paragraph(...parseDescription(v.description, v.deprecationReason)),
+          Paragraph(
+            ...parseDescription(v.description, v.deprecationReason, isNew(v)),
+          ),
         ]),
       ],
-      { background: v.deprecationReason ? "red" : undefined },
+      {
+        background: v.deprecationReason
+          ? "red"
+          : isNew(v)
+            ? "green"
+            : undefined,
+      },
     );
   });
   return Table([
@@ -241,6 +272,7 @@ const enumOptionsTable = (t: GraphQLEnumType): ADFNode => {
 const parseDescription = (
   d: string | null | undefined,
   deprecationReason?: string | null | undefined,
+  isNew?: boolean,
 ): ADFNode[] => {
   // todo: support markdown description
   const res = [] as ADFNode[];
@@ -249,6 +281,13 @@ const parseDescription = (
       Text(`(deprecated) ${deprecationReason}\n`, {
         strong: true,
         color: "red",
+      }),
+    );
+  if (isNew)
+    res.push(
+      Text(`new item\n`, {
+        strong: true,
+        color: "green",
       }),
     );
   if (d) res.push(Text(d));
@@ -262,6 +301,14 @@ const deprecationReason = (t: GraphQLType): string | null => {
     deprecated[0]?.arguments?.[0]?.["value"]?.["value"] ??
     "No longer supported";
   return deprecated.length > 0 ? deprecationReason : null;
+};
+
+const isNew = (
+  t: GraphQLType | GraphQLField<any, any, any> | GraphQLEnumValue,
+): boolean => {
+  const directives = (t["astNode"]?.["directives"] ?? []) as DirectiveNode[];
+  const deprecated = directives.filter((d) => d.name.value === "new");
+  return deprecated.length > 0;
 };
 
 const getTypeName = (
