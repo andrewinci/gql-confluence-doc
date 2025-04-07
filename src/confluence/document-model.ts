@@ -125,7 +125,7 @@ export const Table = (rows: TableRow[]): Table => {
 
 export const TableRow = (
   content: TableHeader[] | TableCell[],
-  opts?: { background: Color },
+  opts?: { background?: Color },
 ): TableRow => ({
   type: "tableRow",
   content: content.map((c) => ({

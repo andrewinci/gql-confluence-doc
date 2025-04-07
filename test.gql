@@ -4,14 +4,14 @@ extend type Query {
   "Get all nested objects"
   nested(in1: TestInput, in2: TestInput2): Nested
 
-  union: SampleUnion
+  union: SampleUnion @deprecated(reason: "Deprecation reason")
 }
 
 type Nested {
   "The id of a nested object"
   id: ID!
   "The name of the nested object"
-  name: String!
+  name: String! @deprecated
   sampleEnum: SampleEnum!
 }
 
@@ -20,7 +20,7 @@ enum SampleEnum {
   "An A option"
   A
   "An B option"
-  B
+  B @deprecated
   "An C option"
   C
 }

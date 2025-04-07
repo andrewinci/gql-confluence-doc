@@ -191,11 +191,16 @@ const fieldsTable = (fields: GraphQLField<any, any, any>[]): ADFNode => {
           : [];
     }
 
-    return TableRow([
-      TableCell([Paragraph(Text(f.name), ...fArgs)]),
-      TableCell([Paragraph(...parseDescription(f.description))]),
-      TableCell([Paragraph(Text(name, { href: `##${url}` }))]),
-    ]);
+    return TableRow(
+      [
+        TableCell([Paragraph(Text(f.name), ...fArgs)]),
+        TableCell([
+          Paragraph(...parseDescription(f.description, f.deprecationReason)),
+        ]),
+        TableCell([Paragraph(Text(name, { href: `##${url}` }))]),
+      ],
+      { background: f.deprecationReason ? "red" : undefined },
+    );
   });
   return Table([
     TableRow(
@@ -212,10 +217,15 @@ const fieldsTable = (fields: GraphQLField<any, any, any>[]): ADFNode => {
 
 const enumOptionsTable = (t: GraphQLEnumType): ADFNode => {
   const fieldRows = t.getValues().map((v) => {
-    return TableRow([
-      TableCell([Paragraph(Text(v.name))]),
-      TableCell([Paragraph(...parseDescription(v.description))]),
-    ]);
+    return TableRow(
+      [
+        TableCell([Paragraph(Text(v.name))]),
+        TableCell([
+          Paragraph(...parseDescription(v.description, v.deprecationReason)),
+        ]),
+      ],
+      { background: v.deprecationReason ? "red" : undefined },
+    );
   });
   return Table([
     TableRow(
@@ -229,8 +239,19 @@ const enumOptionsTable = (t: GraphQLEnumType): ADFNode => {
   ]);
 };
 
-const parseDescription = (d: string | null | undefined): ADFNode[] => {
+const parseDescription = (
+  d: string | null | undefined,
+  deprecationReason?: string | null | undefined,
+): ADFNode[] => {
   // todo: support markdown description
-  if (!d) return [];
-  else return [Text(d)];
+  const res = [] as ADFNode[];
+  if (deprecationReason)
+    res.push(
+      Text(`Deprecated - ${deprecationReason}\n`, {
+        strong: true,
+        color: "red",
+      }),
+    );
+  if (d) res.push(Text(d));
+  return res;
 };
