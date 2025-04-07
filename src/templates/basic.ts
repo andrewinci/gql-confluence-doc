@@ -1,7 +1,5 @@
 import {
-  ConstDirectiveNode,
   DirectiveNode,
-  GraphQLDirective,
   GraphQLEnumType,
   GraphQLField,
   GraphQLInputType,
@@ -11,7 +9,6 @@ import {
   GraphQLType,
   isEnumType,
   isInputObjectType,
-  isInputType,
   isObjectType,
   isScalarType,
   isUnionType,
@@ -32,6 +29,7 @@ import {
   BulletList,
   ListItem,
   HardBreak,
+  Panel,
 } from "../confluence/document-model";
 
 const TABLE_HEADER_BACKGROUND = "#b3d4ff";
@@ -109,7 +107,7 @@ const parseGqlType = (
   opts?: { withHeader: boolean },
 ): ADFNode[] => {
   const res = [] as ADFNode[];
-
+  const deprecated = deprecationReason(t);
   if (opts?.withHeader) {
     // type name as header
     res.push(Heading(2, Text(t.name)));
@@ -128,13 +126,17 @@ const parseGqlType = (
     }
 
     // add deprecation badge
-    if (deprecationReason(t))
+    if (deprecated)
       res.push(
-        Paragraph(
-          Text(`⚠️ deprecated: ${deprecationReason(t)}`, {
-            strong: true,
-            color: "red",
-          }),
+        Panel(
+          [
+            Paragraph(
+              Text(`(deprecated) ${deprecated}`, {
+                strong: true,
+              }),
+            ),
+          ],
+          "error",
         ),
       );
   }
@@ -244,7 +246,7 @@ const parseDescription = (
   const res = [] as ADFNode[];
   if (deprecationReason)
     res.push(
-      Text(`deprecated - ${deprecationReason}\n`, {
+      Text(`(deprecated) ${deprecationReason}\n`, {
         strong: true,
         color: "red",
       }),

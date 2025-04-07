@@ -8,7 +8,8 @@ export type ADFNode =
   | Table
   | Status
   | BulletList
-  | HardBreak;
+  | HardBreak
+  | Panel;
 
 export type ADFDocument = {
   type: "doc";
@@ -207,6 +208,22 @@ type HardBreak = {
 
 export const HardBreak = (): HardBreak => ({
   type: "hardBreak",
+});
+
+/*********** Panel node ***************/
+type Panel = {
+  type: "panel";
+  attrs: { panelType: "success" | "error" | "warning" };
+  content: Paragraph[];
+};
+
+export const Panel = (
+  content: Paragraph[],
+  panelType: "success" | "error" | "warning",
+): Panel => ({
+  type: "panel",
+  attrs: { panelType },
+  content,
 });
 
 /*************** Table of content node ***************/
