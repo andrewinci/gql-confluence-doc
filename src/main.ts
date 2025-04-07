@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+import { program } from "commander";
 import { ConfluenceClient } from "./confluence/client";
 import { loadGqlSchema } from "./gql/schema";
 import { BasicTemplate } from "./templates/basic";
+import { version } from "../package.json";
 
 async function test() {
   // load graphql schema
@@ -24,8 +26,33 @@ async function test() {
   });
 }
 
-async function main() {
-  console.log("gql to confluence");
-}
+program
+  .name("gql-confluence")
+  .description("Tool to generate confluence documentation for graphql")
+  .version(version);
 
-main();
+program
+  .command("check-page")
+  .description("Retrieve info about the page in confluence")
+  .argument("<page-id>", "The confluence page id")
+  .requiredOption("-d,--domain <domain>", "the confluence domain to use")
+  .requiredOption(
+    "-t,--token <token>",
+    "the confluence token to use. Generate one at https://id.atlassian.com/manage-profile/security/api-tokens",
+  )
+  .requiredOption("-u,--user <user>", "the confluence user email")
+  .action(async (pageId, options) => {
+    const confluenceClient = ConfluenceClient({
+      domain: options.domain,
+      token: options.token,
+      user: options.user,
+    });
+    const page = await confluenceClient.getPageById(pageId);
+    console.log(`Page ${page.id} found`);
+    console.log(`Page title: ${page.title}`);
+    console.log(`Page version: ${page.currentVersion}`);
+    console.log(`Page spaceId: ${page.spaceId}`);
+    console.log(`Page content:\n${JSON.stringify(page.body, null, 2)}`);
+  });
+
+program.parse();

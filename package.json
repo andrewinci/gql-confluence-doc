@@ -1,9 +1,8 @@
 {
   "name": "gql-confluence-doc",
   "version": "0.0.1",
-  "description": "",
+  "description": "A tool to publish graphql documentation to confluence",
   "main": "src/main.ts",
-  "type": "module",
   "bin": {
     "gql-confluence-doc": "bin/index.js"
   },
@@ -29,6 +28,7 @@
     "tsx": "^4.19.3"
   },
   "dependencies": {
+    "commander": "^13.1.0",
     "graphql": "^16.10.0"
   }
 }
