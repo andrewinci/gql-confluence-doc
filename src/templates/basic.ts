@@ -4,12 +4,14 @@ import {
   GraphQLEnumValue,
   GraphQLField,
   GraphQLInputType,
+  GraphQLInterfaceType,
   GraphQLNamedType,
   GraphQLOutputType,
   GraphQLSchema,
   GraphQLType,
   isEnumType,
   isInputObjectType,
+  isInterfaceType,
   isObjectType,
   isScalarType,
   isUnionType,
@@ -32,6 +34,7 @@ import {
   HardBreak,
   Panel,
 } from "../confluence/document-model";
+import { IncomingMessage } from "http";
 
 const TABLE_HEADER_BACKGROUND = "#b3d4ff";
 
@@ -63,6 +66,21 @@ export const BasicTemplate: GqlConfluenceTemplate = {
         publicTypes
           .filter((t) => isObjectType(t) && !isEnumType(t) && !isScalarType(t))
           .filter((t) => !["Mutation", "Query"].includes(t.name)),
+      ),
+    );
+    // parse interfaces
+    documentBody.push(
+      ...parseGqlTypes(
+        "Interfaces",
+        publicTypes
+          .filter((t) => isInterfaceType(t))
+          .map((intf) => {
+            const implementingTypes = Object.values(schema.getTypeMap()).filter(
+              (t) => t["getInterfaces"]?.().includes(intf),
+            );
+            intf["implementingTypes"] = implementingTypes;
+            return intf;
+          }),
       ),
     );
     //parse inputs
@@ -125,6 +143,8 @@ const parseGqlType = (
       res.push(Paragraph(Status("union", "yellow")));
     } else if (isInputObjectType(t)) {
       res.push(Paragraph(Status("input", "purple")));
+    } else if (isInterfaceType(t)) {
+      res.push(Paragraph(Status("interface", "blue")));
     }
 
     // add deprecation panel
@@ -183,6 +203,14 @@ const parseGqlType = (
       .map(([name, url]) => ListItem(Text(name, { href: `##${url}` })));
     res.push(Paragraph(Text("Union of"), BulletList(...items)));
   }
+
+  if (isInterfaceType(t)) {
+    const items = t["implementingTypes"]
+      .map((t) => getTypeName(t))
+      .map(([name, url]) => ListItem(Text(name, { href: `##${url}` })));
+    res.push(Paragraph(Text("Implemented by"), BulletList(...items)));
+  }
+
   return res;
 };
 

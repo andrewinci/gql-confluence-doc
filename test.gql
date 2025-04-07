@@ -44,12 +44,20 @@ input TestInput2 {
 
 union SampleUnion = Nested
 
-type A @deprecated {
+interface Letter @new {
+  name: String
+}
+
+interface SampleInterface {
+  value: String @deprecated
+}
+
+type A implements Letter @deprecated {
   aField: String!
 }
-type B {
+type B implements Letter {
   bField: String!
 }
-type C @new {
+type C implements Letter @new {
   cField: String!
 }
