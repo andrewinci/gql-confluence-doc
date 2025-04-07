@@ -2,7 +2,7 @@ extend type Query {
   name: String!
 
   "Get all nested objects"
-  nested(in: TestInput): Nested
+  nested(in1: TestInput, in2: TestInput2): Nested
 
   union: SampleUnion
 }
@@ -26,6 +26,10 @@ enum SampleEnum {
 }
 
 input TestInput {
+  nameInput: String!
+}
+
+input TestInput2 {
   nameInput: String!
 }
 

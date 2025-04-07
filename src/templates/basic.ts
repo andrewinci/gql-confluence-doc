@@ -1,6 +1,7 @@
 import {
   GraphQLEnumType,
   GraphQLField,
+  GraphQLInputType,
   GraphQLNamedType,
   GraphQLOutputType,
   GraphQLSchema,
@@ -24,6 +25,7 @@ import {
   TableOfContent,
   BulletList,
   ListItem,
+  HardBreak,
 } from "../confluence/document-model";
 
 const TABLE_HEADER_BACKGROUND = "#b3d4ff";
@@ -59,6 +61,8 @@ export const BasicTemplate: GqlConfluenceTemplate = {
           .flatMap((t) => parseGqlType(t, { withHeader: true })),
       );
     }
+
+    //todo: parse input types
 
     const unions = publicTypes.filter((t) => isUnionType(t));
     if (unions.length > 0) {
@@ -145,7 +149,9 @@ const parseGqlType = (
   return res;
 };
 
-const getOutputTypeName = (t: GraphQLOutputType): [string, string] => {
+const getOutputTypeName = (
+  t: GraphQLOutputType | GraphQLInputType,
+): [string, string] => {
   const outType = t.toJSON();
   return [outType, outType.replace("!", "").replace("[", "").replace("]", "")];
 };
@@ -153,8 +159,22 @@ const getOutputTypeName = (t: GraphQLOutputType): [string, string] => {
 const fieldsTable = (fields: GraphQLField<any, any, any>[]): ADFNode => {
   const fieldRows = fields.map((f) => {
     const [name, url] = getOutputTypeName(f.type);
+    const args = f.args.flatMap((a, i, arr) => {
+      const [name, url] = getOutputTypeName(a.type);
+      return [
+        Text(`\t${a.name}:`, { italic: true }),
+        Text(name, { href: `##${url}` }),
+        ...(i === arr.length - 1 ? [] : [Text(","), HardBreak()]),
+      ];
+    });
+
+    const fArgs =
+      args.length > 0
+        ? [Text("("), HardBreak(), ...args, HardBreak(), Text(")")]
+        : [];
+
     return TableRow([
-      TableCell([Paragraph(Text(f.name))]),
+      TableCell([Paragraph(Text(f.name), ...fArgs)]),
       TableCell([Paragraph(...parseDescription(f.description))]),
       TableCell([Paragraph(Text(name, { href: `##${url}` }))]),
     ]);
